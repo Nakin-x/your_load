@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid px-3 pt-3 pb-5">
+
+    <h4 class="mb-3 fw-semibold" id="nome-scheda"></h4>
+
+    <button id="nuovo-test" class="btn btn-success btn-lg w-100 mb-3">
+        Nuovo test
+    </button>
+
+
+    <h4>Storico test</h4>
+    <ul id="storico-test" class="list-group"></ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const SCHEDA_ID = "{{ scheda_id }}";
+</script>
+<script src="{% static 'core/js/scheda.js' %}"></script>
+{% endblock %}

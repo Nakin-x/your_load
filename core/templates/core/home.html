@@ -1,0 +1,28 @@
+
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid px-3 pt-4">
+
+    <div class="mx-auto" style="max-width: 420px;">
+
+        <h4 class="text-center fw-semibold mb-4">Your-Load</h4>
+
+        <div class="mb-3">
+            <input type="text" id="nome-scheda" class="form-control form-control-lg"
+                   placeholder="Nome scheda (es. Palestra)">
+        </div>
+
+        <button id="crea-scheda" class="btn btn-success btn-lg w-100 mb-4">
+            Crea scheda
+        </button>
+
+        <div id="schede-container" class="d-grid gap-3"></div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/js/schede.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,25 @@
+
+
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid px-3 pt-3 pb-5">
+
+    <h4 class="mb-3 fw-semibold">Test Your-Load</h4>
+
+    <div id="test-container"></div>
+
+    <div class="mt-3">
+        <button id="btn-prev" class="btn btn-secondary d-none">Indietro</button>
+        <button id="btn-next" class="btn btn-primary">Avanti</button>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const SCHEDA_ID = "{{ scheda_id }}";
+</script>
+<script src="{% static 'core/js/test.js' %}"></script>
+{% endblock %}

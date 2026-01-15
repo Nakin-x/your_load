@@ -1,0 +1,20 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 14px;
+}
+
+.btn {
+    border-radius: 12px;
+}
+
+
+.card:active {
+    transform: scale(0.98);
+}
+
+button:active {
+    transform: scale(0.97);
+}
