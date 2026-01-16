@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
             editBtn.className = "btn btn-outline-secondary btn-sm";
             editBtn.textContent = "✏️";
             editBtn.addEventListener("click", (e) => {
+                console.log("CLICK EDIT ANDROID", scheda.id);
                 e.stopPropagation();
                 rinominaScheda(scheda.id);
             });
@@ -82,6 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // FUNZIONI GLOBALI (richiamate dai listener)
     window.rinominaScheda = function (id) {
+        console.log("SCHEDE.JS CARICATO - VERSIONE ANDROID");
+
         const data = loadData();
         const scheda = data.schede.find(s => s.id === id);
         if (!scheda) return;
