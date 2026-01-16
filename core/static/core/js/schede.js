@@ -19,29 +19,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
         data.schede.forEach(scheda => {
             const card = document.createElement("div");
-            card.className = "card shadow-sm";
+            card.className = "card shadow-sm mb-2";
             card.style.cursor = "pointer";
 
-            card.onclick = () => {
+            card.addEventListener("click", () => {
                 window.location.href = `/scheda/${scheda.id}/`;
-            };
+            });
 
-            card.innerHTML = `
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <span class="fw-medium">${scheda.nome}</span>
-                    <div class="btn-group">
-                        <button class="btn btn-outline-secondary btn-sm"
-                            onclick="event.stopPropagation(); rinominaScheda('${scheda.id}')">
-                            ✏️
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm"
-                            onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">
-                            🗑
-                        </button>
-                    </div>
-                </div>
-            `;
+            const cardBody = document.createElement("div");
+            cardBody.className =
+                "card-body d-flex justify-content-between align-items-center";
 
+            const title = document.createElement("span");
+            title.className = "fw-medium";
+            title.textContent = scheda.nome;
+
+            const btnGroup = document.createElement("div");
+            btnGroup.className = "btn-group";
+
+            const editBtn = document.createElement("button");
+            editBtn.className = "btn btn-outline-secondary btn-sm";
+            editBtn.textContent = "✏️";
+            editBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                rinominaScheda(scheda.id);
+            });
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "btn btn-outline-danger btn-sm";
+            deleteBtn.textContent = "🗑";
+            deleteBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                eliminaScheda(scheda.id);
+            });
+
+            btnGroup.appendChild(editBtn);
+            btnGroup.appendChild(deleteBtn);
+
+            cardBody.appendChild(title);
+            cardBody.appendChild(btnGroup);
+            card.appendChild(cardBody);
             container.appendChild(card);
         });
     }
@@ -63,13 +80,13 @@ document.addEventListener("DOMContentLoaded", () => {
         renderSchede();
     });
 
-    // 🔽 FUNZIONI GLOBALI (OBBLIGATORIE)
+    // FUNZIONI GLOBALI (richiamate dai listener)
     window.rinominaScheda = function (id) {
         const data = loadData();
         const scheda = data.schede.find(s => s.id === id);
         if (!scheda) return;
 
-        const nuovoNome = prompt("Nuovo nome scheda:", scheda.nome);
+        const nuovoNome = prompt("Rinomina scheda:", scheda.nome);
         if (nuovoNome) {
             scheda.nome = nuovoNome;
             saveData(data);
@@ -86,6 +103,5 @@ document.addEventListener("DOMContentLoaded", () => {
         renderSchede();
     };
 
-    // ✅ QUESTA ERA LA CHIAMATA MANCANTE
     renderSchede();
 });
