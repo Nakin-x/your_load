@@ -98,8 +98,12 @@ function renderValutazione() {
             if (step < DIMENSIONI.length) {
                 renderValutazione();
             } else {
-                calcolaRisultatoFinale();
+                // passa alla fase confronti
+                fase = "confronti";
+                step = 0;
+                renderCoppia();
             }
+
         };
     });
 }
@@ -220,7 +224,7 @@ function salvaTest(pesi, overall) {
     
 document.addEventListener("DOMContentLoaded", () => {
     coppie = shuffle(generaCoppie());
-    fase = 1;
+    fase = "slider";
     step = 0;
 
     renderValutazione();
