@@ -14,27 +14,27 @@ const DIMENSIONI = [
 const DOMANDE_SLIDER = [
     {
         key: "Richiesta Mentale",
-        testo: "Quanto l’attività ha richiesto concentrazione mentale?"
+        testo: "Quanto dispendioso è stato il compito da un punto di vista mentale?"
     },
     {
         key: "Richiesta Fisica",
-        testo: "Quanto l’attività è stata fisicamente impegnativa?"
+        testo: "Quanto dispendioso è stato il compito da un punto di vista fisico?"
     },
     {
         key: "Richiesta Temporale",
-        testo: "Quanto hai percepito pressanti le richieste temporali?"
+        testo: "Quanto hai percepito pressanti le richieste temporali del compito?"
     },
     {
         key: "Prestazione",
-        testo: "Quanto ritieni di aver svolto bene il compito?"
+        testo: "Quanto bravo sei stato a fare il compito che ti è stato richiesto?"
     },
     {
         key: "Sforzo",
-        testo: "Quanto sforzo hai dovuto investire?"
+        testo: "Quanto duramente ti sei dovuto impegnare per svolgere il compito?"
     },
     {
         key: "Frustrazione",
-        testo: "Quanto ti sei sentito stressato o frustrato?"
+        testo: "Quanto sei stato insicuro, scoraggiato, irritato, stressato e infastidito?"
     }
 ];
 
@@ -65,29 +65,43 @@ function generaCoppie() {
 /* =======================
    FASE 1 — SLIDER
 ======================= */
-
-function renderSlider() {
+function renderValutazione() {
     const container = document.getElementById("test-container");
-    document.getElementById("btn-next").classList.remove("d-none");
+    const btnNext = document.getElementById("btn-next");
 
-    const domanda = DOMANDE_SLIDER[step];
+    btnNext.classList.add("d-none");
+
+    const dim = DIMENSIONI[step];
+
+    let buttons = "";
+    for (let i = 0; i <= 20; i++) {
+        buttons += `
+            <button class="btn btn-outline-primary m-1 slot-btn"
+                    data-value="${i}">
+                ${i}
+            </button>
+        `;
+    }
 
     container.innerHTML = `
-        <p class="text-center fw-semibold">${domanda.key}</p>
-        <p class="text-center text-muted">${domanda.testo}</p>
-
-        <input id="slider" type="range" class="form-range mt-4"
-               min="0" max="100" value="50">
-
-        <p class="text-center fs-5 fw-semibold mt-2">
-            <span id="val">50</span>
-        </p>
+        <p class="text-center fs-6 mt-4">${dim}</p>
+        <div class="d-flex flex-wrap justify-content-center mt-3">
+            ${buttons}
+        </div>
     `;
 
-    const slider = document.getElementById("slider");
-    const val = document.getElementById("val");
+    document.querySelectorAll(".slot-btn").forEach(btn => {
+        btn.onclick = () => {
+            valutazioni[DIMENSIONI[step]] = parseInt(btn.dataset.value);
+            step++;
 
-    slider.oninput = () => val.textContent = slider.value;
+            if (step < DIMENSIONI.length) {
+                renderValutazione();
+            } else {
+                calcolaRisultatoFinale();
+            }
+        };
+    });
 }
 
 function nextSlider() {
@@ -145,6 +159,15 @@ function scegli(valore) {
     }
 }
 
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+
 /* =======================
    CALCOLO & SALVATAGGIO
 ======================= */
@@ -195,15 +218,14 @@ function salvaTest(pesi, overall) {
 ======================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-    coppie = generaCoppie();
-    fase = "slider";
+    
+document.addEventListener("DOMContentLoaded", () => {
+    coppie = shuffle(generaCoppie());
+    fase = 1;
     step = 0;
 
-    document.getElementById("btn-next").onclick = () => {
-        if (fase === "slider") {
-            nextSlider();
-        }
-    };
-
-    renderSlider();
+    renderValutazione();
 });
+
+});
+
