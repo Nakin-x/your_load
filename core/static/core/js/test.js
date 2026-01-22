@@ -217,7 +217,6 @@ function salvaTest(pesi, overall) {
    AVVIO
 ======================= */
 
-document.addEventListener("DOMContentLoaded", () => {
     
 document.addEventListener("DOMContentLoaded", () => {
     coppie = shuffle(generaCoppie());
@@ -227,5 +226,4 @@ document.addEventListener("DOMContentLoaded", () => {
     renderValutazione();
 });
 
-});
 

@@ -11,8 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!data.schede || data.schede.length === 0) {
             container.innerHTML = `
-                <div class="text-muted text-center">
-                    Nessuna scheda creata
+                <div class="text-muted text-center mt-4">
+                    <p class="fw-medium">Nessuna scheda presente</p>
+                    <p class="small">
+                        Crea una scheda per accedere al test
+                    </p>
                 </div>`;
             return;
         }
