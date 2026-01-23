@@ -3,38 +3,29 @@
 ======================= */
 
 const DIMENSIONI = [
-    "Richiesta Mentale",
-    "Richiesta Fisica",
-    "Richiesta Temporale",
-    "Prestazione",
-    "Sforzo",
-    "Frustrazione"
-];
-
-const DOMANDE_SLIDER = [
     {
         key: "Richiesta Mentale",
-        testo: "Quanto dispendioso è stato il compito da un punto di vista mentale?"
+        domanda: "Quanto dispendioso è stato il compito da un punto di vista mentale?"
     },
     {
         key: "Richiesta Fisica",
-        testo: "Quanto dispendioso è stato il compito da un punto di vista fisico?"
+        domanda: "Quanto dispendioso è stato il compito da un punto di vista fisico?"
     },
     {
         key: "Richiesta Temporale",
-        testo: "Quanto hai percepito pressanti le richieste temporali del compito?"
+        domanda: "Quanto hai percepito pressanti le richieste temporali del compito?"
     },
     {
         key: "Prestazione",
-        testo: "Quanto bravo sei stato a fare il compito che ti è stato richiesto?"
+        domanda: "Quanto bravo sei stato a fare il compito che ti è stato richiesto?"
     },
     {
         key: "Sforzo",
-        testo: "Quanto duramente ti sei dovuto impegnare per svolgere il compito?"
+        domanda: "Quanto duramente ti sei dovuto impegnare per svolgere il compito?"
     },
     {
         key: "Frustrazione",
-        testo: "Quanto sei stato insicuro, scoraggiato, irritato, stressato e infastidito?"
+        domanda: "Quanto sei stato insicuro, scoraggiato, irritato, stressato e infastidito?"
     }
 ];
 
@@ -42,7 +33,6 @@ const DOMANDE_SLIDER = [
    STATO
 ======================= */
 
-let fase = "slider"; // slider | confronti
 let step = 0;
 let coppie = [];
 let risposteCoppie = [];
@@ -56,75 +46,60 @@ function generaCoppie() {
     const result = [];
     for (let i = 0; i < DIMENSIONI.length; i++) {
         for (let j = i + 1; j < DIMENSIONI.length; j++) {
-            result.push([DIMENSIONI[i], DIMENSIONI[j]]);
+            result.push([DIMENSIONI[i].key, DIMENSIONI[j].key]);
         }
     }
     return result;
 }
 
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 /* =======================
-   FASE 1 — SLIDER
+   FASE 1 — VALUTAZIONE 0–20
 ======================= */
+
 function renderValutazione() {
     const container = document.getElementById("test-container");
-    const btnNext = document.getElementById("btn-next");
-
-    btnNext.classList.add("d-none");
-
     const dim = DIMENSIONI[step];
 
     let buttons = "";
     for (let i = 0; i <= 20; i++) {
         buttons += `
-            <button class="btn btn-outline-primary m-1 slot-btn"
-                    data-value="${i}">
+            <button class="btn btn-outline-primary m-1 slot-btn" data-value="${i}">
                 ${i}
             </button>
         `;
     }
 
     container.innerHTML = `
-        <p class="text-center fs-6 mt-4">${dim}</p>
+        <p class="text-center fs-6 mt-4">${dim.domanda}</p>
         <div class="d-flex flex-wrap justify-content-center mt-3">
             ${buttons}
         </div>
+        <p class="text-center text-muted mt-2">
+            ${step + 1} / ${DIMENSIONI.length}
+        </p>
     `;
 
     document.querySelectorAll(".slot-btn").forEach(btn => {
         btn.onclick = () => {
-            valutazioni[DIMENSIONI[step]] = parseInt(btn.dataset.value);
+            valutazioni[dim.key] = parseInt(btn.dataset.value);
             step++;
 
             if (step < DIMENSIONI.length) {
                 renderValutazione();
             } else {
-                // passa alla fase confronti
-                fase = "confronti";
                 step = 0;
                 renderCoppia();
             }
-
         };
     });
-}
-
-function nextSlider() {
-    const slider = document.getElementById("slider");
-    const domanda = DOMANDE_SLIDER[step];
-
-    valutazioni[domanda.key] = parseInt(slider.value);
-
-    step++;
-
-    if (step < DOMANDE_SLIDER.length) {
-        renderSlider();
-    } else {
-        // passa ai confronti
-        fase = "confronti";
-        step = 0;
-        document.getElementById("btn-next").classList.add("d-none");
-        renderCoppia();
-    }
 }
 
 /* =======================
@@ -163,71 +138,75 @@ function scegli(valore) {
     }
 }
 
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
-
 /* =======================
-   CALCOLO & SALVATAGGIO
+   CALCOLO RISULTATI
 ======================= */
 
-function calcolaPesi() {
-    const pesi = {};
-    DIMENSIONI.forEach(d => pesi[d] = 0);
-    risposteCoppie.forEach(r => pesi[r]++);
-    return pesi;
+function calcolaConteggi() {
+    const conteggi = {};
+    DIMENSIONI.forEach(d => conteggi[d.key] = 0);
+    risposteCoppie.forEach(r => conteggi[r]++);
+    return conteggi;
 }
 
 function calcolaRisultatoFinale() {
-    const pesi = calcolaPesi();
-    let totale = 0;
+    const conteggi = calcolaConteggi();
+    const singleWorkload = {};
+    const percentuali = {};
+    let totaleWorkload = 0;
 
     DIMENSIONI.forEach(d => {
-        const valore = valutazioni[d] ?? 0; // ← PROTEZIONE
-        totale += pesi[d] * valore;
+        const v = valutazioni[d.key];   // 0–20
+        const vas = v * 5;              // VAS%
+        const c = conteggi[d.key];      // frequenza coppie
+        const sw = vas * c;
+
+        singleWorkload[d.key] = sw;
+        totaleWorkload += sw;
     });
 
-    const overall = totale / 15;
-    salvaTest(pesi, overall);
+    DIMENSIONI.forEach(d => {
+        percentuali[d.key] =
+            totaleWorkload > 0
+                ? (singleWorkload[d.key] * 100) / totaleWorkload
+                : 0;
+    });
+
+    salvaTest({
+        valutazioni,
+        conteggi,
+        singleWorkload,
+        percentuali,
+        totaleWorkload
+    });
 }
 
+/* =======================
+   SALVATAGGIO
+======================= */
 
-function salvaTest(pesi, overall) {
+function salvaTest(risultati) {
     const data = loadData();
     const scheda = data.schede.find(s => s.id === SCHEDA_ID);
 
     scheda.test.push({
         nome: "Test " + (scheda.test.length + 1),
         data: new Date().toLocaleDateString(),
-        pesi,
-        valutazioni,
-        overall
+        ...risultati
     });
 
     saveData(data);
-    const testIndex = scheda.test.length - 1;
 
-    window.location.href =
-    `/scheda/${SCHEDA_ID}/risultato/${testIndex}/`;
-
+    const index = scheda.test.length - 1;
+    window.location.href = `/scheda/${SCHEDA_ID}/risultato/${index}/`;
 }
 
 /* =======================
    AVVIO
 ======================= */
 
-    
 document.addEventListener("DOMContentLoaded", () => {
     coppie = shuffle(generaCoppie());
-    fase = "slider";
     step = 0;
-
     renderValutazione();
 });
-
-
