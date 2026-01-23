@@ -18,3 +18,22 @@ body {
 button:active {
     transform: scale(0.97);
 }
+
+
+.slot-labels {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.slot-btn {
+    padding: 14px 0;
+    font-size: 1.1rem;
+    border-radius: 999px;
+}

@@ -71,21 +71,31 @@ function renderValutazione() {
     let buttons = "";
     for (let i = 0; i <= 20; i++) {
         buttons += `
-            <button class="btn btn-outline-primary m-1 slot-btn" data-value="${i}">
+            <button class="slot-btn btn btn-outline-primary fw-semibold"
+                    data-value="${i}">
                 ${i}
             </button>
         `;
     }
 
+
     container.innerHTML = `
-        <p class="text-center fs-6 mt-4">${dim.domanda}</p>
-        <div class="d-flex flex-wrap justify-content-center mt-3">
-            ${buttons}
-        </div>
-        <p class="text-center text-muted mt-2">
-            ${step + 1} / ${DIMENSIONI.length}
-        </p>
-    `;
+    <p class="text-center fs-6 mt-4">${dim.domanda}</p>
+
+    <div class="slot-grid mt-4">
+        ${buttons}
+    </div>
+
+    <div class="d-flex justify-content-between mt-2 px-1 slot-labels">
+        <span>Molto bassa</span>
+        <span>Molto alta</span>
+    </div>
+
+    <p class="text-center text-muted mt-3">
+        ${step + 1} / ${DIMENSIONI.length}
+    </p>
+`;
+
 
     document.querySelectorAll(".slot-btn").forEach(btn => {
         btn.onclick = () => {
@@ -125,7 +135,48 @@ function renderCoppia() {
 
     document.getElementById("btn-a").onclick = () => scegli(a);
     document.getElementById("btn-b").onclick = () => scegli(b);
+    renderRadarChart(test);
 }
+
+
+function renderRadarChart(test) {
+    const ctx = document.getElementById("radarChart").getContext("2d");
+
+    const labels = Object.keys(test.percentuali);
+    const dataValues = labels.map(k => test.percentuali[k]);
+
+    new Chart(ctx, {
+        type: "radar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Distribuzione Workload (%)",
+                data: dataValues,
+                fill: true,
+                backgroundColor: "rgba(13, 110, 253, 0.2)",
+                borderColor: "rgba(13, 110, 253, 1)",
+                pointBackgroundColor: "rgba(13, 110, 253, 1)"
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
 
 function scegli(valore) {
     risposteCoppie.push(valore);
@@ -136,6 +187,8 @@ function scegli(valore) {
     } else {
         calcolaRisultatoFinale();
     }
+    
+
 }
 
 /* =======================
