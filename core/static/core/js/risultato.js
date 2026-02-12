@@ -66,3 +66,39 @@ function renderRisultato(test) {
 
     renderRadarChart(test);
 }
+
+
+function renderRadarChart(test) {
+    const ctx = document.getElementById("radarChart").getContext("2d");
+
+    const labels = Object.keys(test.percentuali);
+    const dataValues = labels.map(k => test.percentuali[k]);
+
+    new Chart(ctx, {
+        type: "radar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Distribuzione Workload (%)",
+                data: dataValues,
+                fill: true,
+                backgroundColor: "rgba(13, 110, 253, 0.2)",
+                borderColor: "rgba(13, 110, 253, 1)",
+                pointBackgroundColor: "rgba(13, 110, 253, 1)"
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
