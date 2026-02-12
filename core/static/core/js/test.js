@@ -68,34 +68,28 @@ function renderValutazione() {
     const container = document.getElementById("test-container");
     const dim = DIMENSIONI[step];
 
-    let buttons = "";
+   let scaleDots = "";
 
-    for (let i = 0; i <= 20; i++) {
-        const width = 40 + (i * 3); // larghezza progressiva
+for (let i = 0; i <= 20; i++) {
+    scaleDots += `
+        <div class="scale-dot" data-value="${i}"></div>
+    `;
+}
 
-        buttons += `
-            <button class="scale-btn"
-                    data-value="${i}"
-                    style="width:${width}%">
-                ${i}
-            </button>
-        `;
-    }
-
-
-    container.innerHTML = `
+container.innerHTML = `
     <p class="text-center fs-6 mt-4">${dim.domanda}</p>
 
-    <div class="text-start small text-muted mt-3">
-        Molto bassa
+    <div class="d-flex justify-content-between small text-muted mt-3">
+        <span>Molto bassa</span>
+        <span>Molto alta</span>
     </div>
 
-    <div class="scale-container mt-2">
-        ${buttons}
+    <div class="scale-wrapper mt-2">
+        ${scaleDots}
     </div>
 
-    <div class="text-end small text-muted mt-2">
-        Molto alta
+    <div class="text-center mt-3">
+        <span id="selected-value" class="fw-semibold fs-5"></span>
     </div>
 
     <p class="text-center text-muted mt-3">
@@ -104,16 +98,28 @@ function renderValutazione() {
 `;
 
 
-    document.querySelectorAll(".scale-btn").forEach(btn => {
-    btn.onclick = () => {
 
-        document.querySelectorAll(".scale-btn")
-            .forEach(b => b.classList.remove("active"));
 
-        btn.classList.add("active");
+    document.querySelectorAll(".scale-dot").forEach(dot => {
+    dot.onclick = () => {
+
+        const value = parseInt(dot.dataset.value);
+
+        document.querySelectorAll(".scale-dot")
+            .forEach(d => d.classList.remove("active"));
+
+        // evidenzia fino al valore scelto
+        document.querySelectorAll(".scale-dot")
+            .forEach(d => {
+                if (parseInt(d.dataset.value) <= value) {
+                    d.classList.add("active");
+                }
+            });
+
+        document.getElementById("selected-value").textContent = value;
 
         setTimeout(() => {
-            valutazioni[dim.key] = parseInt(btn.dataset.value);
+            valutazioni[dim.key] = value;
             step++;
 
             if (step < DIMENSIONI.length) {
@@ -122,9 +128,10 @@ function renderValutazione() {
                 step = 0;
                 renderCoppia();
             }
-        }, 150);
+        }, 200);
     };
 });
+
 
 }
 

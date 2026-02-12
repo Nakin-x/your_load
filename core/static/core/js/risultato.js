@@ -64,6 +64,5 @@ function renderRisultato(test) {
 
     container.innerHTML = html;
 
-    // per ora NON disegniamo il grafico
-    // lo colleghiamo nel prossimo step
+    renderRadarChart(test);
 }
