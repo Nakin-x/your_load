@@ -69,10 +69,14 @@ function renderValutazione() {
     const dim = DIMENSIONI[step];
 
     let buttons = "";
+
     for (let i = 0; i <= 20; i++) {
+        const width = 40 + (i * 3); // larghezza progressiva
+
         buttons += `
-            <button class="slot-btn btn btn-outline-primary fw-semibold"
-                    data-value="${i}">
+            <button class="scale-btn"
+                    data-value="${i}"
+                    style="width:${width}%">
                 ${i}
             </button>
         `;
@@ -82,13 +86,16 @@ function renderValutazione() {
     container.innerHTML = `
     <p class="text-center fs-6 mt-4">${dim.domanda}</p>
 
-    <div class="slot-grid mt-4">
+    <div class="text-start small text-muted mt-3">
+        Molto bassa
+    </div>
+
+    <div class="scale-container mt-2">
         ${buttons}
     </div>
 
-    <div class="d-flex justify-content-between mt-2 px-1 slot-labels">
-        <span>Molto bassa</span>
-        <span>Molto alta</span>
+    <div class="text-end small text-muted mt-2">
+        Molto alta
     </div>
 
     <p class="text-center text-muted mt-3">
@@ -97,8 +104,15 @@ function renderValutazione() {
 `;
 
 
-    document.querySelectorAll(".slot-btn").forEach(btn => {
-        btn.onclick = () => {
+    document.querySelectorAll(".scale-btn").forEach(btn => {
+    btn.onclick = () => {
+
+        document.querySelectorAll(".scale-btn")
+            .forEach(b => b.classList.remove("active"));
+
+        btn.classList.add("active");
+
+        setTimeout(() => {
             valutazioni[dim.key] = parseInt(btn.dataset.value);
             step++;
 
@@ -108,8 +122,10 @@ function renderValutazione() {
                 step = 0;
                 renderCoppia();
             }
-        };
-    });
+        }, 150);
+    };
+});
+
 }
 
 /* =======================
