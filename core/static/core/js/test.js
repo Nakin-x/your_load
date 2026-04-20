@@ -68,73 +68,93 @@ function renderValutazione() {
     const container = document.getElementById("test-container");
     const dim = DIMENSIONI[step];
 
-   let scaleDots = "";
+    let scaleDots = "";
 
-for (let i = 0; i <= 20; i++) {
-    scaleDots += `
-        <div class="scale-dot" data-value="${i}"></div>
+    for (let i = 0; i <= 20; i++) {
+        scaleDots += `
+            <div class="scale-dot" data-value="${i}"></div>
+        `;
+    }
+
+    container.innerHTML = `
+        <p class="text-center fs-6 mt-4">${dim.domanda}</p>
+
+        <div class="d-flex justify-content-between small text-muted mt-3">
+            <span>Molto alta</span>
+            <span>Molto bassa</span>
+        </div>
+
+        <div class="scale-wrapper mt-2">
+            ${scaleDots}
+        </div>
+
+        <div class="text-center mt-3">
+            <span id="selected-value" class="fw-semibold fs-5"></span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            ${step > 0 ? '<button class="btn btn-outline-secondary btn-sm" id="btn-back">Indietro</button>' : '<div></div>'}
+            <small class="text-muted">
+                ${step + 1} / ${DIMENSIONI.length}
+            </small>
+        </div>
     `;
-}
 
-container.innerHTML = `
-    <p class="text-center fs-6 mt-4">${dim.domanda}</p>
+    const selected = valutazioni[dim.key];
 
-    <div class="d-flex justify-content-between small text-muted mt-3">
-        <span>Molto bassa</span>
-        <span>Molto alta</span>
-    </div>
+    // ✅ RIPRISTINO VALORE SE GIÀ SELEZIONATO
+    if (selected != null) {
+        document.getElementById("selected-value").textContent = selected;
 
-    <div class="scale-wrapper mt-2">
-        ${scaleDots}
-    </div>
-
-    <div class="text-center mt-3">
-        <span id="selected-value" class="fw-semibold fs-5"></span>
-    </div>
-
-    <p class="text-center text-muted mt-3">
-        ${step + 1} / ${DIMENSIONI.length}
-    </p>
-`;
-
-
-
-
-    document.querySelectorAll(".scale-dot").forEach(dot => {
-    dot.onclick = () => {
-
-        const value = parseInt(dot.dataset.value);
-
-        document.querySelectorAll(".scale-dot")
-            .forEach(d => d.classList.remove("active"));
-
-        // evidenzia fino al valore scelto
-        document.querySelectorAll(".scale-dot")
-            .forEach(d => {
-                if (parseInt(d.dataset.value) <= value) {
-                    d.classList.add("active");
-                }
-            });
-
-        document.getElementById("selected-value").textContent = value;
-
-        setTimeout(() => {
-            valutazioni[dim.key] = value;
-            step++;
-
-            if (step < DIMENSIONI.length) {
-                renderValutazione();
-            } else {
-                step = 0;
-                renderCoppia();
+        document.querySelectorAll(".scale-dot").forEach(d => {
+            if (parseInt(d.dataset.value) <= selected) {
+                d.classList.add("active");
             }
-        }, 200);
-    };
-});
+        });
+    }
 
+    // ✅ CLICK DOTS
+    document.querySelectorAll(".scale-dot").forEach(dot => {
+        dot.onclick = () => {
 
+            const value = parseInt(dot.dataset.value);
+
+            // reset
+            document.querySelectorAll(".scale-dot")
+                .forEach(d => d.classList.remove("active"));
+
+            // attiva fino al valore scelto
+            document.querySelectorAll(".scale-dot")
+                .forEach(d => {
+                    if (parseInt(d.dataset.value) <= value) {
+                        d.classList.add("active");
+                    }
+                });
+
+            document.getElementById("selected-value").textContent = value;
+
+            setTimeout(() => {
+                valutazioni[dim.key] = value;
+                step++;
+
+                if (step < DIMENSIONI.length) {
+                    renderValutazione();
+                } else {
+                    step = 0;
+                    renderCoppia();
+                }
+            }, 200);
+        };
+    });
+
+    // ✅ BOTTONE INDIETRO
+    if (step > 0) {
+        document.getElementById("btn-back").onclick = () => {
+            step--;
+            renderValutazione();
+        };
+    }
 }
-
 /* =======================
    FASE 2 — CONFRONTI
 ======================= */
@@ -143,24 +163,56 @@ function renderCoppia() {
     const container = document.getElementById("test-container");
     const [a, b] = coppie[step];
 
+    const selected = risposteCoppie[step];
+
     container.innerHTML = `
         <p class="text-center fw-semibold">
             Quale influisce di più sul carico di lavoro?
         </p>
 
-        <button class="btn btn-outline-primary w-100 mb-2" id="btn-a">${a}</button>
-        <button class="btn btn-outline-primary w-100" id="btn-b">${b}</button>
+        <button class="btn w-100 mb-2 ${selected === a ? 'btn-primary' : 'btn-outline-primary'}" id="btn-a">
+            ${a}
+        </button>
 
-        <p class="text-center text-muted mt-3">
-            ${step + 1} / ${coppie.length}
-        </p>
+        <button class="btn w-100 ${selected === b ? 'btn-primary' : 'btn-outline-primary'}" id="btn-b">
+            ${b}
+        </button>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            ${step > 0 ? '<button class="btn btn-outline-secondary btn-sm" id="btn-back">Indietro</button>' : '<div></div>'}
+            <small class="text-muted">
+                ${step + 1} / ${coppie.length}
+            </small>
+        </div>
     `;
 
+    // ✅ SELEZIONE
     document.getElementById("btn-a").onclick = () => scegli(a);
     document.getElementById("btn-b").onclick = () => scegli(b);
-    renderRadarChart(test);
+
+    // ✅ BACK
+    if (step > 0) {
+        document.getElementById("btn-back").onclick = () => {
+            step--;
+
+            // 🔴 fondamentale: rimuovi ultima risposta
+            risposteCoppie.pop();
+
+            renderCoppia();
+        };
+    }
 }
 
+function scegli(valore) {
+    risposteCoppie[step] = valore; // 🔴 invece di push
+    step++;
+
+    if (step < coppie.length) {
+        renderCoppia();
+    } else {
+        calcolaRisultatoFinale();
+    }
+}
 
 function renderRadarChart(test) {
     const ctx = document.getElementById("radarChart").getContext("2d");
@@ -232,7 +284,7 @@ function calcolaRisultatoFinale() {
     let totaleWorkload = 0;
 
     DIMENSIONI.forEach(d => {
-        const v = valutazioni[d.key];   // 0–20
+        const v = valutazioni[d.key] ?? 0;   // 0–20
         const vas = v * 5;              // VAS%
         const c = conteggi[d.key];      // frequenza coppie
         const sw = vas * c;
@@ -248,12 +300,17 @@ function calcolaRisultatoFinale() {
                 : 0;
     });
 
+    const overall = totaleWorkload / 15;
+    
+
+
     salvaTest({
         valutazioni,
         conteggi,
         singleWorkload,
         percentuali,
-        totaleWorkload
+        totaleWorkload,
+        overall
     });
 }
 

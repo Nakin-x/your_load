@@ -31,25 +31,48 @@ document.addEventListener("DOMContentLoaded", () => {
         scheda.test.forEach((t, index) => {
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
+            li.style.cursor = "pointer";
+
+            // ✅ CLICK SULLA RIGA → APRI RISULTATO
+            li.onclick = () => {
+                window.location.href = `/scheda/${scheda.id}/risultato/${index}/`;
+            };
 
             li.innerHTML = `
                 <div>
                     <div class="fw-medium">${t.nome || "Test"}</div>
                     <small class="text-muted">
-                        Overall: ${Number.isFinite(t.overall) ? t.overall.toFixed(2) : "N/D"}
+                        Overall: ${
+                            Number.isFinite(t.overall)
+                                ? Number(t.overall).toFixed(1)
+                                : "N/D"
+                        }
                     </small>
                 </div>
+
                 <div class="btn-group">
-                    <button class="btn btn-outline-secondary btn-sm"
-                        onclick="rinominaTest(${index})">✏️</button>
-                    <button class="btn btn-outline-danger btn-sm"
-                        onclick="eliminaTest(${index})">🗑</button>
+                    <button class="btn btn-outline-secondary btn-sm btn-rinomina">
+                        ✏️
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm btn-elimina">
+                        🗑
+                    </button>
                 </div>
             `;
 
+            // ✅ BLOCCA PROPAGAZIONE CLICK BOTTONI
+            li.querySelector(".btn-rinomina").onclick = (e) => {
+                e.stopPropagation();
+                rinominaTest(index);
+            };
+
+            li.querySelector(".btn-elimina").onclick = (e) => {
+                e.stopPropagation();
+                eliminaTest(index);
+            };
+
             lista.appendChild(li);
-        });
-    }
+        });}
 
     window.rinominaTest = function (index) {
         const nuovoNome = prompt(
@@ -72,6 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderStorico();
     };
 
-    // ✅ QUESTA ERA LA RIGA MANCANTE
+    
     renderStorico();
 });

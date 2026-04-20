@@ -27,11 +27,12 @@ function renderRisultato(test) {
             <div class="card-body text-center">
                 <h5 class="mb-1">Workload Totale</h5>
                 <div class="fs-3 fw-semibold">
-                    ${test.totaleWorkload.toFixed(1)}
+                    ${test.overall.toFixed(1)}
+                    
                 </div>
             </div>
         </div>
-
+${console.log("TEST COMPLETO", test)}
         <div class="card mb-3">
             <div class="card-body">
                 <h6 class="mb-3">Dettaglio per dimensione</h6>

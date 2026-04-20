@@ -92,3 +92,8 @@ button:active {
 .scale-dot.active {
     background-color: #0d6efd;
 }
+
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
