@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
 
 urlpatterns = [
@@ -10,4 +10,6 @@ urlpatterns = [
         views.risultato,
         name="risultato"
     ),
+    path("login/", views.login_view),
+    
 ]

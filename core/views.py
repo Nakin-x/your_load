@@ -1,7 +1,5 @@
-from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
 
 def home(request):
     return render(request, "core/home.html")
@@ -22,3 +20,17 @@ def risultato(request, scheda_id, test_index):
             "test_index": test_index
         }
     )
+
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("/")
+
+    return render(request, "core/login.html")

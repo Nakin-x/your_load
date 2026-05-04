@@ -58,7 +58,30 @@ function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+
 }
+
+
+
+//USER
+
+let userId = localStorage.getItem("user_id");
+
+if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem("user_id", userId);
+}
+
+
+fetch("/api/user/sync/", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        user_id: userId
+    })
+});
 
 /* =======================
    FASE 1 — VALUTAZIONE 0–20
@@ -80,8 +103,8 @@ function renderValutazione() {
         <p class="text-center fs-6 mt-4">${dim.domanda}</p>
 
         <div class="d-flex justify-content-between small text-muted mt-3">
-            <span>Molto alta</span>
             <span>Molto bassa</span>
+            <span>Molto alta</span>
         </div>
 
         <div class="scale-wrapper mt-2">
@@ -115,38 +138,42 @@ function renderValutazione() {
 
     // ✅ CLICK DOTS
     document.querySelectorAll(".scale-dot").forEach(dot => {
-        dot.onclick = () => {
+        
+                dot.onclick = () => {
 
-            const value = parseInt(dot.dataset.value);
+                    const rawValue = parseInt(dot.dataset.value);
+                    let value = rawValue;
 
-            // reset
-            document.querySelectorAll(".scale-dot")
-                .forEach(d => d.classList.remove("active"));
-
-            // attiva fino al valore scelto
-            document.querySelectorAll(".scale-dot")
-                .forEach(d => {
-                    if (parseInt(d.dataset.value) <= value) {
-                        d.classList.add("active");
+                    if (dim.key === "Prestazione") {
+                        value = 20 - rawValue;
                     }
-                });
 
-            document.getElementById("selected-value").textContent = value;
+                    // reset
+                    document.querySelectorAll(".scale-dot")
+                        .forEach(d => d.classList.remove("active"));
 
-            setTimeout(() => {
-                valutazioni[dim.key] = value;
-                step++;
+                    // attiva fino al valore scelto
 
-                if (step < DIMENSIONI.length) {
-                    renderValutazione();
-                } else {
-                    step = 0;
-                    renderCoppia();
-                }
-            }, 200);
-        };
-    });
+                        document.querySelectorAll(".scale-dot")
+                            .forEach(d => {
+                                if (parseInt(d.dataset.value) <= rawValue) {
+                                    d.classList.add("active");
+                                }
+                            });
 
+                    document.getElementById("selected-value").textContent = value;
+
+                    valutazioni[dim.key] = value;
+                    step++;
+
+                    if (step < DIMENSIONI.length) {
+                        renderValutazione();
+                    } else {
+                        step = 0;
+                        renderCoppia();
+                    }
+                };
+            });
     // ✅ BOTTONE INDIETRO
     if (step > 0) {
         document.getElementById("btn-back").onclick = () => {
@@ -319,8 +346,18 @@ function calcolaRisultatoFinale() {
 ======================= */
 
 function salvaTest(risultati) {
-    const data = loadData();
-    const scheda = data.schede.find(s => s.id === SCHEDA_ID);
+    body: JSON.stringify({
+    user_id: localStorage.getItem("user_id"),
+    scheda_id: SCHEDA_ID,
+    valutazioni,
+    conteggi,
+    percentuali,
+    totaleWorkload,
+    overall
+    })
+    console.log("USER ID:", localStorage.getItem("user_id"));
+    const localData = loadData();
+    const scheda = localData.schede.find(s => s.id === SCHEDA_ID);
 
     scheda.test.push({
         nome: "Test " + (scheda.test.length + 1),
@@ -328,11 +365,42 @@ function salvaTest(risultati) {
         ...risultati
     });
 
-    saveData(data);
+    // salva subito in locale (NON aspettare server)
+    saveData(localData);
 
     const index = scheda.test.length - 1;
-    window.location.href = `/scheda/${SCHEDA_ID}/risultato/${index}/`;
+
+    // 🔴 chiamata server NON BLOCCANTE
+        fetch("/api/test/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            scheda_id: SCHEDA_ID,
+            valutazioni: risultati.valutazioni,
+            conteggi: risultati.conteggi,
+            singleWorkload: risultati.singleWorkload,
+            percentuali: risultati.percentuali,
+            totaleWorkload: risultati.totaleWorkload,
+            overall: risultati.overall
+        })
+    })
+    .then(res => res.json())
+    .then(response => {
+        console.log("Salvato su server:", response);
+        window.location.href = `/scheda/${SCHEDA_ID}/risultato/${index}/`;
+    })
+    .catch(err => {
+        console.error("Errore server:", err);
+    });
+
+    
 }
+
+//API  SAVE
+
+
 
 /* =======================
    AVVIO

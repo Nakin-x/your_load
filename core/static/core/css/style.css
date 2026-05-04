@@ -97,3 +97,10 @@ button:active {
 .list-group-item:hover {
     background-color: #f8f9fa;
 }
+
+
+.scale-dot.active {
+    background: #0d6efd;
+    transform: scale(1.2);
+    transition: 0.1s;
+}
