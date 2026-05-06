@@ -83,18 +83,18 @@ def export_tests_csv(request):
     return response
 
 
+
+
 def setup_database(request):
     try:
+        # Esegue tutte le migrazioni (crea le tabelle)
         call_command("migrate", interactive=False)
-        call_command("collectstatic", interactive=False, verbosity=0)
-        return HttpResponse("Migrate and collectstatic done.")
+        # Crea il superuser solo se non esiste già
+        if not User.objects.filter(username="admin").exists():
+            User.objects.create_superuser("admin", "", "password123")
+            msg = "Migrate OK. Superuser 'admin' creato. Password: password123. CAMBIALA SUBITO!"
+        else:
+            msg = "Migrate OK. Superuser già esistente."
+        return HttpResponse(msg)
     except Exception as e:
-        return HttpResponse(f"Error: {e}")
-    
-
-
-def create_superuser(request):
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser("admin", "", "password123")
-        return HttpResponse("Superuser creato. Ora cambia la password!")
-    return HttpResponse("Superuser esiste già.")
+        return HttpResponse(f"Errore: {e}")
