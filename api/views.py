@@ -12,6 +12,8 @@ import csv
 
 from django.core.management import call_command
 
+from django.contrib.auth.models import User
+
 
 @csrf_exempt
 def salva_test(request):
@@ -88,3 +90,11 @@ def setup_database(request):
         return HttpResponse("Migrate and collectstatic done.")
     except Exception as e:
         return HttpResponse(f"Error: {e}")
+    
+
+
+def create_superuser(request):
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("admin", "", "password123")
+        return HttpResponse("Superuser creato. Ora cambia la password!")
+    return HttpResponse("Superuser esiste già.")
