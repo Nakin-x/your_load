@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import salva_test, lista_test, sync_user, export_tests_csv, setup_database, create_superuser
+from .views import salva_test, lista_test, sync_user, export_tests_csv, setup_database
 
 urlpatterns = [
     path("test/", salva_test),
