@@ -346,45 +346,34 @@ function calcolaRisultatoFinale() {
 ======================= */
 
 function salvaTest(risultati) {
-    body: JSON.stringify({
-    user_id: localStorage.getItem("user_id"),
-    scheda_id: SCHEDA_ID,
-    valutazioni,
-    conteggi,
-    percentuali,
-    totaleWorkload,
-    overall
-    })
-    console.log("USER ID:", localStorage.getItem("user_id"));
+    // Usa i dati dall'oggetto 'risultati' passato da calcolaRisultatoFinale
+    const payload = {
+        user_id: localStorage.getItem("user_id"),
+        scheda_id: SCHEDA_ID,
+        valutazioni: risultati.valutazioni,
+        conteggi: risultati.conteggi,
+        percentuali: risultati.percentuali,
+        totaleWorkload: risultati.totaleWorkload,
+        overall: risultati.overall
+    };
+
+    // Salva subito in localStorage (continua a funzionare offline)
     const localData = loadData();
     const scheda = localData.schede.find(s => s.id === SCHEDA_ID);
-
     scheda.test.push({
         nome: "Test " + (scheda.test.length + 1),
         data: new Date().toLocaleDateString(),
         ...risultati
     });
-
-    // salva subito in locale (NON aspettare server)
     saveData(localData);
 
     const index = scheda.test.length - 1;
 
-    // 🔴 chiamata server NON BLOCCANTE
-        fetch("/api/test/", {
+    // Chiamata server (non bloccante)
+    fetch("/api/test/", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            scheda_id: SCHEDA_ID,
-            valutazioni: risultati.valutazioni,
-            conteggi: risultati.conteggi,
-            singleWorkload: risultati.singleWorkload,
-            percentuali: risultati.percentuali,
-            totaleWorkload: risultati.totaleWorkload,
-            overall: risultati.overall
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(response => {
@@ -393,11 +382,10 @@ function salvaTest(risultati) {
     })
     .catch(err => {
         console.error("Errore server:", err);
+        // Ricarica comunque la pagina del risultato (dati salvati in locale)
+        window.location.href = `/scheda/${SCHEDA_ID}/risultato/${index}/`;
     });
-
-    
 }
-
 //API  SAVE
 
 

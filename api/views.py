@@ -5,6 +5,9 @@ import json
 from django.http import JsonResponse
 from .models import Test, AppUser
 from django.http import HttpResponse
+
+import csv
+
 @csrf_exempt
 def salva_test(request):
     if request.method == "POST":
@@ -59,3 +62,15 @@ def sync_user(request):
             "user_id": user.user_id,
             "created": created
         })
+    
+
+
+
+def export_tests_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="tests.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Scheda ID', 'Data', 'Overall', 'Percentuali', 'User ID'])
+    for test in Test.objects.all().select_related('user'):
+        writer.writerow([test.id, test.scheda_id, test.data, test.overall, json.dumps(test.percentuali), test.user.user_id if test.user else ''])
+    return response
