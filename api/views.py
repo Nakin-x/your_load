@@ -8,6 +8,11 @@ from django.http import HttpResponse
 
 import csv
 
+
+
+from django.core.management import call_command
+
+
 @csrf_exempt
 def salva_test(request):
     if request.method == "POST":
@@ -74,3 +79,12 @@ def export_tests_csv(request):
     for test in Test.objects.all().select_related('user'):
         writer.writerow([test.id, test.scheda_id, test.data, test.overall, json.dumps(test.percentuali), test.user.user_id if test.user else ''])
     return response
+
+
+def setup_database(request):
+    try:
+        call_command("migrate", interactive=False)
+        call_command("collectstatic", interactive=False, verbosity=0)
+        return HttpResponse("Migrate and collectstatic done.")
+    except Exception as e:
+        return HttpResponse(f"Error: {e}")
