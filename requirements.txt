@@ -3,3 +3,4 @@ gunicorn
 whitenoise
 dj-database-url
 django-import-export
+psycopg2-binary
