@@ -1,4 +1,5 @@
 Django==6.0
 gunicorn
 whitenoise
+dj-database-url
 django-import-export
