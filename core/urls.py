@@ -11,5 +11,6 @@ urlpatterns = [
         name="risultato"
     ),
     path("login/", views.login_view),
+    path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
     
 ]

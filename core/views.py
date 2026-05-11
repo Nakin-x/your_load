@@ -34,3 +34,11 @@ def login_view(request):
             return redirect("/")
 
     return render(request, "core/login.html")
+
+
+
+# views.py
+
+
+def privacy_policy(request):
+    return render(request, "privacy_policy.html")
