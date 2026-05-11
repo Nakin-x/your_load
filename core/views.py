@@ -41,4 +41,4 @@ def login_view(request):
 
 
 def privacy_policy(request):
-    return render(request, "privacy_policy.html")
+    return render(request, "core/privacy_policy.html")
