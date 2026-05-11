@@ -76,7 +76,7 @@ def export_tests_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="tests.csv"'
     writer = csv.writer(response)
-    writer.writerow(['ID', 'Scheda ID', 'Data', 'Overall', 'Percentuali', 'User ID'])
+    writer.writerow(['ID', 'Scheda ID', 'Data', 'Overall', 'Percentuali', 'User ID', 'Nickname'])
     for test in Test.objects.all().select_related('user'):
         writer.writerow([
             test.id,
@@ -84,10 +84,10 @@ def export_tests_csv(request):
             test.data.strftime("%Y-%m-%d %H:%M"),
             test.overall,
             json.dumps(test.percentuali),
-            test.user.user_id if test.user else ''
+            test.user.user_id if test.user else '',
+            test.user.nickname if test.user else ''
         ])
     return response
-
 
 
 
@@ -104,3 +104,18 @@ def setup_database(request):
         return HttpResponse(msg)
     except Exception as e:
         return HttpResponse(f"Errore: {e}")
+    
+
+@csrf_exempt
+def set_nickname(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        user_id = data.get("user_id")
+        nickname = data.get("nickname")
+        if not user_id or not nickname:
+            return JsonResponse({"error": "user_id and nickname are required"}, status=400)
+        user, created = AppUser.objects.get_or_create(user_id=user_id)
+        user.nickname = nickname
+        user.save()
+        return JsonResponse({"status": "ok", "nickname": nickname})
+    return JsonResponse({"error": "Only POST allowed"}, status=405)

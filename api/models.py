@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class AppUser(models.Model):
      user_id = models.CharField(max_length=100, unique=True)
      created_at = models.DateTimeField(auto_now_add=True)
+     nickname = models.CharField(max_length=100, blank=True, null=True)
      
 class Test(models.Model):
     user = models.ForeignKey(AppUser, on_delete=models.CASCADE, null=True, blank=True)
