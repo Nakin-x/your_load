@@ -15,6 +15,10 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 
 
+from django.views.decorators.http import require_POST
+
+
+
 @csrf_exempt
 def salva_test(request):
     if request.method == "POST":
@@ -119,3 +123,42 @@ def set_nickname(request):
         user.save()
         return JsonResponse({"status": "ok", "nickname": nickname})
     return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+
+
+@csrf_exempt
+@require_POST
+def user_sync(request):
+    """Crea l'utente se non esiste ancora (chiamato all'avvio del test)."""
+    data = json.loads(request.body)
+    user_id = data.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "user_id mancante"}, status=400)
+    
+    user, created = AppUser.objects.get_or_create(user_id=user_id)
+    return JsonResponse({
+        "status": "ok",
+        "created": created,
+        "nickname": user.nickname or ""
+    })
+
+
+@csrf_exempt
+@require_POST
+def user_nickname(request):
+    """Associa un nickname al user_id."""
+    data = json.loads(request.body)
+    user_id = data.get("user_id")
+    nickname = data.get("nickname", "").strip()
+
+    if not user_id or not nickname:
+        return JsonResponse({"error": "user_id o nickname mancante"}, status=400)
+
+    try:
+        user = AppUser.objects.get(user_id=user_id)
+    except AppUser.DoesNotExist:
+        user = AppUser.objects.create(user_id=user_id)
+
+    user.nickname = nickname
+    user.save()
+    return JsonResponse({"status": "ok", "nickname": user.nickname})
