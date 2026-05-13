@@ -58,12 +58,11 @@ function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
-
 }
 
-
-
-//USER
+/* =======================
+   USER
+======================= */
 
 let userId = localStorage.getItem("user_id");
 
@@ -72,15 +71,10 @@ if (!userId) {
     localStorage.setItem("user_id", userId);
 }
 
-
 fetch("/api/user/sync/", {
     method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        user_id: userId
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId })
 });
 
 /* =======================
@@ -92,11 +86,8 @@ function renderValutazione() {
     const dim = DIMENSIONI[step];
 
     let scaleDots = "";
-
     for (let i = 0; i <= 20; i++) {
-        scaleDots += `
-            <div class="scale-dot" data-value="${i}"></div>
-        `;
+        scaleDots += `<div class="scale-dot" data-value="${i}"></div>`;
     }
 
     container.innerHTML = `
@@ -117,18 +108,14 @@ function renderValutazione() {
 
         <div class="d-flex justify-content-between align-items-center mt-3">
             ${step > 0 ? '<button class="btn btn-outline-secondary btn-sm" id="btn-back">Indietro</button>' : '<div></div>'}
-            <small class="text-muted">
-                ${step + 1} / ${DIMENSIONI.length}
-            </small>
+            <small class="text-muted">${step + 1} / ${DIMENSIONI.length}</small>
         </div>
     `;
 
     const selected = valutazioni[dim.key];
 
-    // ✅ RIPRISTINO VALORE SE GIÀ SELEZIONATO
     if (selected != null) {
         document.getElementById("selected-value").textContent = selected;
-
         document.querySelectorAll(".scale-dot").forEach(d => {
             if (parseInt(d.dataset.value) <= selected) {
                 d.classList.add("active");
@@ -136,45 +123,35 @@ function renderValutazione() {
         });
     }
 
-    // ✅ CLICK DOTS
     document.querySelectorAll(".scale-dot").forEach(dot => {
-        
-                dot.onclick = () => {
+        dot.onclick = () => {
+            const rawValue = parseInt(dot.dataset.value);
+            let value = rawValue;
 
-                    const rawValue = parseInt(dot.dataset.value);
-                    let value = rawValue;
+            if (dim.key === "Prestazione") {
+                value = 20 - rawValue;
+            }
 
-                    if (dim.key === "Prestazione") {
-                        value = 20 - rawValue;
-                    }
-
-                    // reset
-                    document.querySelectorAll(".scale-dot")
-                        .forEach(d => d.classList.remove("active"));
-
-                    // attiva fino al valore scelto
-
-                        document.querySelectorAll(".scale-dot")
-                            .forEach(d => {
-                                if (parseInt(d.dataset.value) <= rawValue) {
-                                    d.classList.add("active");
-                                }
-                            });
-
-                    document.getElementById("selected-value").textContent = value;
-
-                    valutazioni[dim.key] = value;
-                    step++;
-
-                    if (step < DIMENSIONI.length) {
-                        renderValutazione();
-                    } else {
-                        step = 0;
-                        renderCoppia();
-                    }
-                };
+            document.querySelectorAll(".scale-dot").forEach(d => d.classList.remove("active"));
+            document.querySelectorAll(".scale-dot").forEach(d => {
+                if (parseInt(d.dataset.value) <= rawValue) {
+                    d.classList.add("active");
+                }
             });
-    // ✅ BOTTONE INDIETRO
+
+            document.getElementById("selected-value").textContent = value;
+            valutazioni[dim.key] = value;
+            step++;
+
+            if (step < DIMENSIONI.length) {
+                renderValutazione();
+            } else {
+                step = 0;
+                renderCoppia();
+            }
+        };
+    });
+
     if (step > 0) {
         document.getElementById("btn-back").onclick = () => {
             step--;
@@ -182,6 +159,7 @@ function renderValutazione() {
         };
     }
 }
+
 /* =======================
    FASE 2 — CONFRONTI
 ======================= */
@@ -189,7 +167,6 @@ function renderValutazione() {
 function renderCoppia() {
     const container = document.getElementById("test-container");
     const [a, b] = coppie[step];
-
     const selected = risposteCoppie[step];
 
     container.innerHTML = `
@@ -207,31 +184,25 @@ function renderCoppia() {
 
         <div class="d-flex justify-content-between align-items-center mt-3">
             ${step > 0 ? '<button class="btn btn-outline-secondary btn-sm" id="btn-back">Indietro</button>' : '<div></div>'}
-            <small class="text-muted">
-                ${step + 1} / ${coppie.length}
-            </small>
+            <small class="text-muted">${step + 1} / ${coppie.length}</small>
         </div>
     `;
 
-    // ✅ SELEZIONE
     document.getElementById("btn-a").onclick = () => scegli(a);
     document.getElementById("btn-b").onclick = () => scegli(b);
 
-    // ✅ BACK
     if (step > 0) {
         document.getElementById("btn-back").onclick = () => {
             step--;
-
-            // 🔴 fondamentale: rimuovi ultima risposta
             risposteCoppie.pop();
-
             renderCoppia();
         };
     }
 }
 
+// ✅ UNICA definizione di scegli — usa l'indice, non push
 function scegli(valore) {
-    risposteCoppie[step] = valore; // 🔴 invece di push
+    risposteCoppie[step] = valore;
     step++;
 
     if (step < coppie.length) {
@@ -239,58 +210,6 @@ function scegli(valore) {
     } else {
         calcolaRisultatoFinale();
     }
-}
-
-function renderRadarChart(test) {
-    const ctx = document.getElementById("radarChart").getContext("2d");
-
-    const labels = Object.keys(test.percentuali);
-    const dataValues = labels.map(k => test.percentuali[k]);
-
-    new Chart(ctx, {
-        type: "radar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Distribuzione Workload (%)",
-                data: dataValues,
-                fill: true,
-                backgroundColor: "rgba(13, 110, 253, 0.2)",
-                borderColor: "rgba(13, 110, 253, 1)",
-                pointBackgroundColor: "rgba(13, 110, 253, 1)"
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    ticks: {
-                        display: false
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-}
-
-
-function scegli(valore) {
-    risposteCoppie.push(valore);
-    step++;
-
-    if (step < coppie.length) {
-        renderCoppia();
-    } else {
-        calcolaRisultatoFinale();
-    }
-    
-
 }
 
 /* =======================
@@ -311,11 +230,10 @@ function calcolaRisultatoFinale() {
     let totaleWorkload = 0;
 
     DIMENSIONI.forEach(d => {
-        const v = valutazioni[d.key] ?? 0;   // 0–20
-        const vas = v * 5;              // VAS%
-        const c = conteggi[d.key];      // frequenza coppie
+        const v = valutazioni[d.key] ?? 0;
+        const vas = v * 5;
+        const c = conteggi[d.key];
         const sw = vas * c;
-
         singleWorkload[d.key] = sw;
         totaleWorkload += sw;
     });
@@ -328,17 +246,8 @@ function calcolaRisultatoFinale() {
     });
 
     const overall = totaleWorkload / 15;
-    
 
-
-    salvaTest({
-        valutazioni,
-        conteggi,
-        singleWorkload,
-        percentuali,
-        totaleWorkload,
-        overall
-    });
+    salvaTest({ valutazioni, conteggi, singleWorkload, percentuali, totaleWorkload, overall });
 }
 
 /* =======================
@@ -346,7 +255,6 @@ function calcolaRisultatoFinale() {
 ======================= */
 
 function salvaTest(risultati) {
-    // Usa i dati dall'oggetto 'risultati' passato da calcolaRisultatoFinale
     const payload = {
         user_id: localStorage.getItem("user_id"),
         scheda_id: SCHEDA_ID,
@@ -357,7 +265,7 @@ function salvaTest(risultati) {
         overall: risultati.overall
     };
 
-    // Salva subito in localStorage (continua a funzionare offline)
+    // Salva in localStorage (funziona anche offline)
     const localData = loadData();
     const scheda = localData.schede.find(s => s.id === SCHEDA_ID);
     scheda.test.push({
@@ -369,7 +277,7 @@ function salvaTest(risultati) {
 
     const index = scheda.test.length - 1;
 
-    // Chiamata server (non bloccante)
+    // Invia al server
     fetch("/api/test/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -382,13 +290,9 @@ function salvaTest(risultati) {
     })
     .catch(err => {
         console.error("Errore server:", err);
-        // Ricarica comunque la pagina del risultato (dati salvati in locale)
         window.location.href = `/scheda/${SCHEDA_ID}/risultato/${index}/`;
     });
 }
-//API  SAVE
-
-
 
 /* =======================
    AVVIO
